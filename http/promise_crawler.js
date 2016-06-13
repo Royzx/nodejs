@@ -2,13 +2,14 @@ var http = require('http');
 var Promise = require('bluebird');
 var cheerio  = require('cheerio');
 var baseUrl = 'http://www.imooc.com/learn/';
-var videoIds = [348,259,197,134,75];
+var videoIds = [348,637];
+
 
 function filterChapters(html){
 	var $ = cheerio.load(html);
 	var chapters = $('.mod-chapters');
-	var titile = $('#page_header .path span').text()
-	var number = parseInt($($('.info_num i')[0]).text().trim(),10)
+	var title = $(".hd h2").text();
+	var number = parseInt($($(".meta-value strong")[3]).text().trim(),10);
 	// var courseData = {
 	// 	title:title,
 	// 	number:number,
@@ -22,7 +23,7 @@ function filterChapters(html){
 	// }
 
 	var courseData = {
-		title:title,
+		title: title,
 		number:number,
 		videos:[]
 	}
@@ -59,9 +60,9 @@ function printCourseInfo(coursesData){
 		console.log(courseData.number + '人学过' + courseData.title + '\n')
 	})
 
-	courseData.forEach(function(courseData){
+	coursesData.forEach(function(courseData){
 		console.log('### '+ courseData.title + '\n')
-		courseData.forEach(function(item){
+		courseData.videos.forEach(function(item){
 			var chapterTitle = item.chapterTitle;
 
 			console.log(chapterTitle + '\n');
@@ -84,9 +85,7 @@ function getPageAsync(url){
 			});
 
 			res.on('end',function(){
-				var courseData = filterChapters(html);
-
-				printCourseInfo(courseData);
+				resolve(html)
 			});
 		}).on('error',function(e){
 			reject(e)
